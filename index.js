@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 let contacts = [
   {
     id: "1",
@@ -35,6 +37,18 @@ app.get("/info", (request, response) => {
 
 app.get("/api/persons", (request, response) => {
   response.json(contacts);
+});
+
+app.get("/api/persons/:id", (request, response) => {
+  const id = request.params.id;
+
+  const contact = contacts.find((contact) => contact.id === id);
+
+  if (contact) {
+    response.json(contact);
+  } else {
+    response.status(404).end();
+  }
 });
 
 const PORT = 3001;
