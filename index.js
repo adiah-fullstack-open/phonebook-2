@@ -39,6 +39,18 @@ app.get("/api/persons", (request, response) => {
   response.json(contacts);
 });
 
+app.post("/api/persons", (request, response) => {
+  const body = request.body;
+
+  const contact = {
+    id: Math.floor(Math.random() * 1000000),
+    ...body,
+  };
+
+  contacts = contacts.concat(contact);
+  response.json(contact);
+});
+
 app.get("/api/persons/:id", (request, response) => {
   const id = request.params.id;
 
