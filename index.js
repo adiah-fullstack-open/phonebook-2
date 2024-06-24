@@ -4,12 +4,12 @@ const morgan = require("morgan");
 
 const app = express();
 
-const corsOptions = {
-  origin: process.env.PORT
-    ? `http://localhost:${PORT}`
-    : "http://localhost:5173",
-  optionSuccessStatus: 200,
-};
+// const corsOptions = {
+//   origin: process.env.PORT
+//     ? `http://localhost:${PORT}`
+//     : "http://localhost:5173",
+//   optionSuccessStatus: 200,
+// };
 
 morgan.token("postData", (req, res) => JSON.stringify(req.body));
 
@@ -40,7 +40,8 @@ const loggingFunction = (tokens, req, res) => {
   }
 };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 // app.use(morgan("tiny"));
 app.use(morgan(loggingFunction));
