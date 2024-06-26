@@ -1,25 +1,16 @@
+require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const morgan = require("morgan");
 
 const app = express();
 
-// const corsOptions = {
-//   origin: process.env.PORT
-//     ? `http://localhost:${PORT}`
-//     : "http://localhost:5173",
-//   optionSuccessStatus: 200,
-// };
+const corsOptions = {
+  origin: "http://localhost:5173",
+  optionSuccessStatus: 200,
+};
 
 morgan.token("postData", (req, res) => JSON.stringify(req.body));
-
-// const requestLogger = (request, response, next) => {
-//   console.log("Method: ", request.method);
-//   console.log("Path: ", request.path);
-//   console.log("Body: ", request.body);
-//   console.log("---");
-//   next();
-// };
 
 const loggingFunction = (tokens, req, res) => {
   let message = [
@@ -40,13 +31,12 @@ const loggingFunction = (tokens, req, res) => {
   }
 };
 
-// app.use(cors(corsOptions));
-app.use(cors());
+const Person = require("./models/person");
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static("dist"));
-// app.use(morgan("tiny"));
 app.use(morgan(loggingFunction));
-// app.use(requestLogger);
 
 let contacts = [
   {
@@ -84,7 +74,9 @@ app.get("/info", (request, response) => {
 });
 
 app.get("/api/persons", (request, response) => {
-  response.json(contacts);
+  Person.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.post("/api/persons", (request, response) => {
@@ -136,7 +128,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
