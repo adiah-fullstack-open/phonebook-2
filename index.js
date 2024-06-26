@@ -31,6 +31,20 @@ const loggingFunction = (tokens, req, res) => {
   }
 };
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
 const Person = require("./models/person");
 
 app.use(express.static("dist"));
@@ -50,7 +64,7 @@ app.get("/info", (request, response) => {
 	`);
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
   if (!body.name || !body.number) {
@@ -61,15 +75,20 @@ app.post("/api/persons", (request, response) => {
 
   const person = new Person(body);
 
-  person.save().then((savedPerson) => {
-    response.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((notes) => {
-    response.json(notes);
-  });
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((notes) => {
+      response.json(notes);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/persons/:id", (request, response) => {
@@ -84,17 +103,15 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then((result) => response.status(204).end())
-    .catch((error) => console.log(error));
+    .catch((error) => next(error));
 });
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
-};
-
 app.use(unknownEndpoint);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
