@@ -15,8 +15,8 @@ mongoose
 
 const personSchema = new mongoose.Schema(
   {
-    content: String,
-    important: Boolean,
+    name: String,
+    number: String,
   },
   { timestamps: true }
 );
