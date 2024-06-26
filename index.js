@@ -33,9 +33,9 @@ const loggingFunction = (tokens, req, res) => {
 
 const Person = require("./models/person");
 
+app.use(express.static("dist"));
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.static("dist"));
 app.use(morgan(loggingFunction));
 
 const checkDuplicates = (name) =>
@@ -48,12 +48,6 @@ app.get("/info", (request, response) => {
 	<p>Phonebook has info for ${count} people</p>
 	<p>${date}</p>
 	`);
-});
-
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((notes) => {
-    response.json(notes);
-  });
 });
 
 app.post("/api/persons", (request, response) => {
@@ -72,6 +66,12 @@ app.post("/api/persons", (request, response) => {
   });
 });
 
+app.get("/api/persons", (request, response) => {
+  Person.find({}).then((notes) => {
+    response.json(notes);
+  });
+});
+
 app.get("/api/persons/:id", (request, response) => {
   const id = request.params.id;
 
@@ -85,10 +85,9 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-  contacts = contacts.filter((contact) => contact.id !== id);
-
-  response.status(204).end();
+  Person.findByIdAndDelete(request.params.id)
+    .then((result) => response.status(204).end())
+    .catch((error) => console.log(error));
 });
 
 const unknownEndpoint = (request, response) => {
