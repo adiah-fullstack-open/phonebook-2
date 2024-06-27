@@ -55,13 +55,19 @@ app.use(morgan(loggingFunction));
 const checkDuplicates = (name) =>
   contacts.filter((person) => person.name === name).length > 0;
 
-app.get("/info", (request, response) => {
-  const count = contacts.length;
-  const date = new Date();
-  response.send(`
-	<p>Phonebook has info for ${count} people</p>
-	<p>${date}</p>
-	`);
+app.get("/info", (request, response, next) => {
+  // const count = contacts.length;
+  // const count =
+  Person.find({})
+    .then((persons) => {
+      const date = new Date();
+      const count = persons.length;
+      response.send(`
+      <p>Phonebook has info for ${count} people</p>
+      <p>${date}</p>
+    `);
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response, next) => {
@@ -85,22 +91,22 @@ app.post("/api/persons", (request, response, next) => {
 
 app.get("/api/persons", (request, response, next) => {
   Person.find({})
-    .then((notes) => {
-      response.json(notes);
+    .then((persons) => {
+      response.json(persons);
     })
     .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const id = request.params.id;
-
-  const contact = contacts.find((contact) => contact.id === id);
-
-  if (contact) {
-    response.json(contact);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
