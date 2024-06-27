@@ -56,8 +56,6 @@ const checkDuplicates = (name) =>
   contacts.filter((person) => person.name === name).length > 0;
 
 app.get("/info", (request, response, next) => {
-  // const count = contacts.length;
-  // const count =
   Person.find({})
     .then((persons) => {
       const date = new Date();
@@ -72,12 +70,6 @@ app.get("/info", (request, response, next) => {
 
 app.post("/api/persons", (request, response, next) => {
   const body = request.body;
-
-  if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: "Name or number missing",
-    });
-  }
 
   const person = new Person(body);
 
@@ -123,7 +115,11 @@ app.put("/api/persons/:id", (request, response, next) => {
     number: body.number,
   };
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(request.params.id, person, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
     .then((updatedPerson) => response.json(updatedPerson))
     .catch((error) => next(error));
 });
